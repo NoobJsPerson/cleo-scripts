@@ -1,0 +1,43 @@
+{$CLEO .cs}
+{$USE input}
+nop
+
+debug_on
+
+int timer = 0
+while true
+    wait 0
+    if and
+        is_key_pressed KeyCode.Num2
+        is_key_just_pressed KeyCode.F 
+    then
+        print_string_now "Player Pressed F" 250
+        while is_key_pressed KeyCode.Num2
+            wait 0
+            timer++
+        end
+        wait 400
+        clear_prints
+        int difference = timer - 29
+        trace "%d" difference
+        if 
+            difference == 0
+        then
+            print_string_now "YAY" 2000
+        else 
+            if 
+                difference < 0
+            then
+                difference = difference * -1
+                print_formatted "You were %d frame(s) too early" 2000 difference
+            else
+                print_formatted "You were %d frame(s) too late" 2000 difference
+            end
+        end
+        timer = 0
+    end
+end       
+        
+
+
+terminate_this_custom_script
