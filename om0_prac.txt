@@ -5,8 +5,62 @@ nop
 debug_on
 
 int timer = 0
+int offset = 29
+
 while true
     wait 0
+    int mainThreadPtr = read_memory 0xA8B42C 4 0
+    
+    int threadName = mainThreadPtr+0x8
+    while not is_text_equal threadName "mob_la1" false
+        mainThreadPtr = read_memory mainThreadPtr 4 0
+        // traveled through all threads. didn't find mob_la1 thread
+        // set mainThreadPtr to the first active thread pointer and go through threads again
+        if mainThreadPtr == 0x0
+        then
+            wait 0
+            mainThreadPtr = read_memory 0xA8B42C 4 0
+        end
+            
+        threadName = mainThreadPtr+0x8
+    end
+
+    int wakeTimePtr = mainThreadPtr+0xCC
+    int wakeTime = read_memory wakeTimePtr 4 0
+    int gameTimer = get_game_timer
+    int deltaTime = wakeTime - gameTimer
+    
+    if deltaTime == 90
+    then
+        write_memory wakeTimePtr 4 gameTimer 0
+    end
+    
+        
+    
+    if 
+        IS_CHAR_IN_ANY_CAR $scplayer
+    then
+        Car currentCar 
+        GET_CAR_CHAR_IS_USING $scplayer currentCar
+        
+        int modelId
+        get_car_model currentCar modelId
+        
+        
+        // 523: Vigilante Model ID
+        if 
+            modelId <> 523
+        then
+            offset = 49
+        else
+            offset = 29
+        end
+    end 
+    
+        
+        
+        
+    
     if and
         is_key_pressed KeyCode.Num2
         is_key_just_pressed KeyCode.F 
@@ -18,7 +72,7 @@ while true
         end
         wait 400
         clear_prints
-        int difference = timer - 29
+        int difference = timer - offset
         trace "%d" difference
         if 
             difference == 0
