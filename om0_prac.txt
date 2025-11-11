@@ -80,7 +80,6 @@ while true
         is_key_pressed submissionKey
         is_key_just_pressed enterExitKey
     then
-        print_string_now "Player Pressed F" 250
         while is_key_pressed submissionKey
             wait 0
             timer++
