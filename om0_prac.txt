@@ -1,11 +1,26 @@
 {$CLEO .cs}
-{$USE input}
+{$USE input, ini}
 nop
 
 debug_on
 
 int timer = 0
 int offset = 29
+
+
+const CONFIG_PATH = "cleo\\om0_prac.ini"
+
+if not does_file_exist CONFIG_PATH
+then
+    File config_file = open_file CONFIG_PATH "at"
+    write_string_to_file config_file "; List of valid codes: https://library.sannybuilder.com/#/sa/script/enums/KeyCode"
+    close_file config_file
+    write_int_to_ini_file 70 CONFIG_PATH "Keys" "EnterExit"
+    write_int_to_ini_file 50 CONFIG_PATH "Keys" "Submission"
+end
+
+int enterExitKey = read_int_from_ini_file CONFIG_PATH "Keys" "EnterExit"
+int submissionKey = read_int_from_ini_file CONFIG_PATH "Keys" "Submission"
 
 while true
     wait 0
@@ -62,11 +77,11 @@ while true
         
     
     if and
-        is_key_pressed KeyCode.Num2
-        is_key_just_pressed KeyCode.F 
+        is_key_pressed submissionKey
+        is_key_just_pressed enterExitKey
     then
         print_string_now "Player Pressed F" 250
-        while is_key_pressed KeyCode.Num2
+        while is_key_pressed submissionKey
             wait 0
             timer++
         end
