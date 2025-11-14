@@ -13,43 +13,51 @@ const CONFIG_PATH = "cleo\\om0_prac.ini"
 if not does_file_exist CONFIG_PATH
 then
     File config_file = open_file CONFIG_PATH "at"
-    write_string_to_file config_file "; List of valid codes: https://library.sannybuilder.com/#/sa/script/enums/KeyCode"
+    write_string_to_file config_file "; List of valid codes: https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes"
     close_file config_file
     write_int_to_ini_file 70 CONFIG_PATH "Keys" "EnterExit"
     write_int_to_ini_file 50 CONFIG_PATH "Keys" "Submission"
+    config_file = open_file CONFIG_PATH "at"
+    write_string_to_file config_file "; 1 to remove the cycle, 0 to keep it (keep it if you want car om0s to work)"
+    close_file config_file
+    write_int_to_ini_file 1 CONFIG_PATH "Options" "RemoveCallCycle"
+
 end
 
 int enterExitKey = read_int_from_ini_file CONFIG_PATH "Keys" "EnterExit"
 int submissionKey = read_int_from_ini_file CONFIG_PATH "Keys" "Submission"
+int removeCallCycle = read_int_from_ini_file CONFIG_PATH "Options" "RemoveCallCycle"
 
 while true
     wait 0
-    int mainThreadPtr = read_memory 0xA8B42C 4 0
-    
-    int threadName = mainThreadPtr+0x8
-    while not is_text_equal threadName "mob_la1" false
-        mainThreadPtr = read_memory mainThreadPtr 4 0
-        // traveled through all threads. didn't find mob_la1 thread
-        // set mainThreadPtr to the first active thread pointer and go through threads again
-        if mainThreadPtr == 0x0
-        then
-            wait 0
-            mainThreadPtr = read_memory 0xA8B42C 4 0
-        end
-            
-        threadName = mainThreadPtr+0x8
-    end
-
-    int wakeTimePtr = mainThreadPtr+0xCC
-    int wakeTime = read_memory wakeTimePtr 4 0
-    int gameTimer = get_game_timer
-    int deltaTime = wakeTime - gameTimer
-    
-    if deltaTime == 90
+    if removeCallCycle == 1
     then
-        write_memory wakeTimePtr 4 gameTimer 0
+        int mainThreadPtr = read_memory 0xA8B42C 4 0
+        
+        int threadName = mainThreadPtr+0x8
+        while not is_text_equal threadName "mob_la1" false
+            mainThreadPtr = read_memory mainThreadPtr 4 0
+             // traveled through all threads. didn't find mob_la1 thread
+             // set mainThreadPtr to the first active thread pointer and go through threads again
+            if mainThreadPtr == 0x0
+            then
+                wait 0
+                mainThreadPtr = read_memory 0xA8B42C 4 0
+            end
+                
+            threadName = mainThreadPtr+0x8
+        end
+
+        int wakeTimePtr = mainThreadPtr+0xCC
+        int wakeTime = read_memory wakeTimePtr 4 0
+        int gameTimer = get_game_timer
+        int deltaTime = wakeTime - gameTimer
+        
+        if deltaTime == 90
+        then
+            write_memory wakeTimePtr 4 gameTimer 0
+        end
     end
-    
         
     
     if 
