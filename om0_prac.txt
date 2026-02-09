@@ -1,12 +1,11 @@
 {$CLEO .cs}
-{$USE input, ini}
+{$USE ini}
 nop
 
-debug_on
+function CControllerConfigManager_GetIsKeyboardKeyJustDown<thiscall, 0x52E450>(self: int {CControllerConfigManager}, key: int {RsKeyCodes}): int
 
 int timer = 0
 int offset = 29
-
 
 const CONFIG_PATH = "cleo\\om0_prac.ini"
 
@@ -17,11 +16,6 @@ then
     close_file config_file
     write_int_to_ini_file 70 CONFIG_PATH "Keys" "EnterExit"
     write_int_to_ini_file 50 CONFIG_PATH "Keys" "Submission"
-    config_file = open_file CONFIG_PATH "at"
-    write_string_to_file config_file "; 1 to remove the cycle, 0 to keep it (keep it if you want car om0s to work)"
-    close_file config_file
-    write_int_to_ini_file 1 CONFIG_PATH "Options" "RemoveCallCycle"
-
 end
 
 int enterExitKey = read_int_from_ini_file CONFIG_PATH "Keys" "EnterExit"
@@ -32,76 +26,59 @@ while true
     wait 0
     if removeCallCycle == 1
     then
-        int mainThreadPtr = read_memory 0xA8B42C 4 0
-        
-        int threadName = mainThreadPtr+0x8
-        while not is_text_equal threadName "mob_la1" false
-            mainThreadPtr = read_memory mainThreadPtr 4 0
-             // traveled through all threads. didn't find mob_la1 thread
-             // set mainThreadPtr to the first active thread pointer and go through threads again
-            if mainThreadPtr == 0x0
-            then
-                wait 0
-                mainThreadPtr = read_memory 0xA8B42C 4 0
-            end
-                
-            threadName = mainThreadPtr+0x8
-        end
-
-        int wakeTimePtr = mainThreadPtr+0xCC
-        int wakeTime = read_memory wakeTimePtr 4 0
-        int gameTimer = get_game_timer
-        int deltaTime = wakeTime - gameTimer
-        
-        if deltaTime == 90
-        then
-            write_memory wakeTimePtr 4 gameTimer 0
-        end
+        int waitAddress = 0xA75930
+        write_memory waitAddress 1 0 0
     end
-        
-    
-    if 
+
+    if
         IS_CHAR_IN_ANY_CAR $scplayer
     then
-        Car currentCar 
+        Car currentCar
         GET_CAR_CHAR_IS_USING $scplayer currentCar
-        
+
         int modelId
         get_car_model currentCar modelId
-        
-        
-        // 523: Vigilante Model ID
-        if 
+
+        // 523: Cop Bike Model ID
+        if
             modelId <> 523
         then
             offset = 49
         else
             offset = 29
         end
-    end 
+    end
     
-        
-        
-        
-    
-    if and
-        is_key_pressed submissionKey
-        is_key_just_pressed enterExitKey
+    // Check if player is using a mouse button. then add 1 to offset to accomodate for the lack of input delay
+    if or
+        submissionKey == 1
+        submissionKey == 2
+        submissionKey == 4
+        submissionKey == 5
+        submissionKey == 6
     then
-        while is_key_pressed submissionKey
+        offset += 1
+    end
+
+    int isEnterExitKeyJustPressed = CControllerConfigManager_GetIsKeyboardKeyJustDown(0xB70198, enterExitKey)
+    if and
+        is_button_pressed PadId.Pad1 Button.Rightshock
+        isEnterExitKeyJustPressed == 12006401
+    then
+        while is_button_pressed PadId.Pad1 Button.Rightshock
             wait 0
             timer++
         end
         wait 400
         clear_prints
         int difference = timer - offset
-        trace "%d" difference
-        if 
+        //        trace "%d" difference
+        if
             difference == 0
         then
             print_string_now "YAY" 2000
-        else 
-            if 
+        else
+            if
                 difference < 0
             then
                 difference = difference * -1
@@ -112,8 +89,6 @@ while true
         end
         timer = 0
     end
-end       
-        
-
+end
 
 terminate_this_custom_script
