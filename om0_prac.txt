@@ -20,15 +20,11 @@ end
 
 int enterExitKey = read_int_from_ini_file CONFIG_PATH "Keys" "EnterExit"
 int submissionKey = read_int_from_ini_file CONFIG_PATH "Keys" "Submission"
-int removeCallCycle = read_int_from_ini_file CONFIG_PATH "Options" "RemoveCallCycle"
 
 while true
     wait 0
-    if removeCallCycle == 1
-    then
-        int waitAddress = 0xA75930
-        write_memory waitAddress 1 0 0
-    end
+    int waitAddress = 0xA75930
+    write_memory waitAddress 1 0 0
 
     if
         IS_CHAR_IN_ANY_CAR $scplayer
