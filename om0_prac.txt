@@ -5,7 +5,7 @@ nop
 function CControllerConfigManager_GetIsKeyboardKeyJustDown<thiscall, 0x52E450>(self: int {CControllerConfigManager}, key: int {RsKeyCodes}): int
 
 int timer = 0
-int offset = 29
+int offset = 30
 
 const CONFIG_PATH = "cleo\\om0_prac.ini"
 
@@ -15,11 +15,9 @@ then
     write_string_to_file config_file "; List of valid codes: https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes"
     close_file config_file
     write_int_to_ini_file 70 CONFIG_PATH "Keys" "EnterExit"
-    write_int_to_ini_file 50 CONFIG_PATH "Keys" "Submission"
 end
 
 int enterExitKey = read_int_from_ini_file CONFIG_PATH "Keys" "EnterExit"
-int submissionKey = read_int_from_ini_file CONFIG_PATH "Keys" "Submission"
 
 while true
     wait 0
@@ -39,22 +37,12 @@ while true
         if
             modelId <> 523
         then
-            offset = 49
+            offset = 50
         else
-            offset = 29
+            offset = 30
         end
     end
     
-    // Check if player is using a mouse button. then add 1 to offset to accomodate for the lack of input delay
-    if or
-        submissionKey == 1
-        submissionKey == 2
-        submissionKey == 4
-        submissionKey == 5
-        submissionKey == 6
-    then
-        offset += 1
-    end
 
     int isEnterExitKeyJustPressed = CControllerConfigManager_GetIsKeyboardKeyJustDown(0xB70198, enterExitKey)
     if and
